@@ -1,0 +1,17 @@
+fotbalista					http://en.wikipedia.org/wiki/Nonogram
+
+easy.in						http://zotmeister.livejournal.com/19060.html
+
+goobix.in					Vygenerováno na http://www.goobix.com/games/nonograms/?s=25
+
+priklad.in					Příklad z dokumentace.
+
+nejednoznacny.in			Ukázka jednoduchého nejednoznačného obrázku.
+
+obdelnik.in					Jednoduchý obdélníkový obrázek.
+
+cat.in (lehce upraveno)		Vygenerováno na http://www.goobix.com/games/nonograms/?s=-2086
+
+duch.in						Vygenerováno na http://www.goobix.com/games/nonograms/?s=-254
+
+klic.in						Vygenerováno na http://www.goobix.com/games/nonograms/?s=-426
