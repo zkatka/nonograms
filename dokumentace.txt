@@ -1,0 +1,118 @@
+Kateřina Zákravská, 2014
+
++---------------------------------------+
+| Řešič nonogramů - kreslených křížovek |
++---------------------------------------+
+
+Zadání
+======
+Cílem programu je vyřešit alespoň nějakou množinu možných zadání nonogramů, tzv.
+kreslených křížovek. V obecném případě se jedná o NP-těžký problém, viz
+http://www.mat.unisi.it/newsito/puma/public\_html/20\_1\_2/01\_Batenburg\_15.pdf
+
+Pro představu zadání může vypadat třeba takto:
+
+Zadání:                             Řešení:
+
+    | 1 | 5 | 2 | 5 | 1 | 2             | 1 | 5 | 2 | 5 | 1 | 2
+----------------------------        ----------------------------
+2 1 |   |   |   |   |   |           2 1 | X | X |   |   |   | X
+----------------------------        ----------------------------
+1 3 |   |   |   |   |   |           1 3 |   | X |   | X | X | X
+----------------------------        ----------------------------
+1 2 |   |   |   |   |   |           1 2 |   | X |   | X | X |
+----------------------------        ----------------------------
+3   |   |   |   |   |   |           3   |   | X | X | X |   |
+----------------------------        ----------------------------
+4   |   |   |   |   |   |           4   |   | X | X | X | X |
+----------------------------        ----------------------------
+1   |   |   |   |   |   |           1   |   |   |   | X |   |
+
+Čísla udávají délku jednotlivých obarvených bloků v tabulce (obarvené značené X), mezi
+každými dvěma bloky je mezera o velikosti alespoň jednoho políčka.
+
+Uživatelské rozhraní
+====================
+Uživatel si nejprve soubor zkompiluje -- je informován, že řešič lze spustit pomocí
+"nono.". Poté je dotázán, zda chce vstup ze souboru, pokud ne, je požadován vstup z
+terminálu (klávesnice). Otázky mají defaultní odpověď, pokud nebude žádná zadaná
+(zvýrazněno velkým písmenem).
+
+Formát vstupního souboru
+------------------------
+Na prvním řádku je číslo H udávající výšku tabulky, tedy počet řádků. Na druhém řádku je
+číslo W udávající šířku tabulky, tedy počet sloupečků. Následuje H řádků se zadáním pro
+jednotlivé řádky tabulky a W řádků se zadáním pro jednotlivé sloupečky. Jednotlivá čísla
+jsou zapsána do prologovského seznamu -- řádek začíná symbolem "[" poté následují čísla
+oddělená čárkami a symboly "]." ukončují řádek.
+
+Pokud je vstup zadáván z terminálu, uživatel je postupně dotázán na tyto údaje a v tomto
+formátu.
+
+(Na převod obrázků z formátu používaného Goobixem je možné použít krátký sedový skript
+ve složce obrazky.)
+
+Příklad vstupu pro zadání výše
+------------------------------
+6.
+6.
+[2 1].
+[1 3].
+[1 2].
+[3].
+[4].
+[1].
+[1].
+[5].
+[2].
+[5].
+[1].
+[2].
+
+Výstup
+------
+Po vyřešení křížovky je možnost výsledek vypsat na obrazovku a uložit do souboru (vlastní
+název nebo default.out). V případě nejednoznačné křížovky, kterou nelze vyřešit celou, je
+uživatel informován, že to nelze a že může povolit tipování (pomocí allow_backtrack :-
+true ve zdrojovém kódu).
+
+Programovací část
+=================
+Stejně jako nonogramy řeší člověk, je i základem programu určovat to, co je zřejmé.
+Program ve všech řádcích a sloupečcích zkusí umístit bloky co nejvíce doleva a co nejvíce
+doprava. Poté ty pozice, které jeden blok zabírá v levém i pravém uspořádání, budou
+označené jako vybarvené. Stejně tomu je i pro mezery.
+
+(* neurčené, X vybarvené, 0 mezera)
+zadání: 5 2 3                          * * * * * 0 * * * * * * * * X * *
+nejlevější uspořádání:                 X X X X X 0 X X 0 0 0 0 X X X 0 0
+nejpravější uspořádání:                X X X X X 0 0 0 0 0 0 X X 0 X X X
+nové pozice:                           X X X X X 0 * * 0 0 0 * X * X * *
+
+Pomocí tohoto postupu ovšem nelze vyřešit taková zadání, kde je potřeba si tipnout správný
+výsledek. V programu je naimplementované jednoduché tipování -- najde první neurčené
+políčko a to tipne nejprve jako černé, poté jako bílé.
+
+Pomocí tohoto postupu lze z přiložených obrázků vyřešit např. easy.in nebo obdelnik.in. Na
+obrázek fotbalista.in je už zapotřebí tipování. Obrázek nejednoznacny.in nemá jednoznačné
+zadání, tedy je na něj potřeba tipování a i potom dostaneme několik možných řešení.
+
+Implementace
+------------
+Křížovka je matice (seznam seznamů), na začátku plná volných proměnných. Pro rychlejší běh
+je na začátku rovnou vytvořena i transpozice matice. Jak se unifikují jednotlivé proměnné,
+promítá se to do obou matic bez nějaké další režie.
+
+Hledání nejlevějšího umístění dělá predikát lmost/3. Postupně se vybarvují políčka, pokud
+se vybarví celý černý blok, je za ním vynucená mezera (popř. návrat zpět a umisťování se
+posune o jedno políčko). Vynucení vybarvování černých bloků souvisle je pomocí predikátu
+lmost_c/3, který je skoro stejný jako lmost/3.
+
+V případě vytváření nejpravějšího uspořádání se nejprve otočí zadání pro řádek a řádek
+samotný, poté je zavoláno lmost/3. Po nalezení se řádek otočí zpět. Na nejlevější a
+nejpravější uspořádání je volán predikát prunik/4, který hledá průnik bloků. Je potřeba
+hledat průnik těch stejných černých bloků (např. první blok z leva v obou řádcích), bílých
+také, ale u nich závisí jenom na pozici vůči černému.
+
+V průběhu se hlídá, jestli se provedly nějaké změny. Pokud žádné neproběhly, přichází na
+řadu možnost tipovat, která se provede, pokud je povolená v programu. Jinak program končí.
